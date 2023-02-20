@@ -307,44 +307,54 @@ def game():
         clock.tick(30)
     bg2 = pg.image.load("images/lost.png")
     while state == 4:
-        # Quit game window
+        # Quit game window if the user clicks the X button
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 pg.quit()
                 exit()
-        pg.event.pump()
+
+        # Get mouse position and button state
         mx, my = pg.mouse.get_pos()
-        l,m,r = pg.mouse.get_pressed()
+        l, m, r = pg.mouse.get_pressed()
+
+        # Update the database with the player's score
         c.execute("SELECT * FROM scores")
         result = c.fetchall()
         if not result:
             c.execute(f"INSERT INTO scores VALUES ({p.score})")
             conn.commit()
-        else:
-            if p.score > int(result[0][0]):
-                c.execute(f"DELETE FROM scores")
-                conn.commit()
-                c.execute(f"INSERT INTO scores VALUES ({p.score})")
-                conn.commit()
+        elif p.score > int(result[0][0]):
+            c.execute(f"DELETE FROM scores")
+            conn.commit()
+            c.execute(f"INSERT INTO scores VALUES ({p.score})")
+            conn.commit()
+
+        # Display the player's score and highest score
         score_text_font = pg.font.Font("fonts/really_free.ttf", 90)
         score_text_text = score_text_font.render(str(p.score), True, black)
-        score_text_rect = pg.Rect(410,234,50,50)
+        score_text_rect = pg.Rect(410, 234, 50, 50)
+
         c.execute("SELECT * FROM scores")
         highest_score = c.fetchall()
         highest_score_text_font = pg.font.Font("fonts/really_free.ttf", 90)
         highest_score_text_text = highest_score_text_font.render(str(highest_score[0][0]), True, black)
-        highest_score_text_rect = pg.Rect(500,290,50,50)
-        continue_rect = pg.Rect(400,400,400,200)
-        if l == 1 and continue_rect.collidepoint(mx,my):
+        highest_score_text_rect = pg.Rect(500, 290, 50, 50)
+
+        # Check if the user clicked the "continue" button
+        continue_rect = pg.Rect(400, 400, 400, 200)
+        if l == 1 and continue_rect.collidepoint(mx, my):
             state = 0
 
+        # Update the screen
         screen.fill(red)
-        screen.blit(bg2, (0,0))
+        screen.blit(bg2, (0, 0))
         screen.blit(score_text_text, score_text_rect)
         screen.blit(highest_score_text_text, highest_score_text_rect)
         pg.display.flip()
 
+        # Cap the frame rate at 60 FPS
         clock.tick(60)
+
 
 def menu():
     global state
